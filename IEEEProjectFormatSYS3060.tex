@@ -1,0 +1,180 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{cellspace}
+\usepackage{float}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+\title{Beer Tap Offerings MDP\\}
+
+\author{\IEEEauthorblockN{Grace Fry}
+\IEEEauthorblockA{\textit{University of Virginia} \\
+fjw3uf}
+\and
+\IEEEauthorblockN{Alexis Lovell}
+\IEEEauthorblockA{\textit{University of Virginia} \\
+jnw4fb}
+\and
+\IEEEauthorblockN{Sarah Naidu}
+\IEEEauthorblockA{\textit{University of Virginia} \\
+gjh5qw}
+\and
+\IEEEauthorblockN{Gabriel Lawrence}
+\IEEEauthorblockA{\textit{University of Virginia} \\
+vzh2vs}
+
+}
+
+\maketitle
+
+\begin{abstract}
+Restaurants are constantly looking for ways to balance operations to minimize their costs while also maximizing their profits.  Alcohol sales regularly comprise a key part of generating profits across all restaurants.  This project analyzed sales of Bold Rock IPA cider at The Fitzroy to create a policy regarding the best time to replace the cider with a new draught offering.  Based on a linear programming approach, it is our recommendation that The Fitzroy replace their offering of Bold Rock IPA cider.  This recommendation holds true for both minimizing the cost of transition and maximizing profits.
+
+\end{abstract}
+
+\begin{IEEEkeywords}
+Markov Decision Process, Business Management, Ethanol, Machine Replacement, Simulation
+\end{IEEEkeywords}
+
+\section{Introduction}
+The focus of this project was to analyze two-years of sales data of Bold Rock IPA cider at The Fitzroy, a restaurant located in Charlottesville, VA. The manager at The Fitzroy is currently trying to determine how he can optimize sales. When a restaurant sells beers on tap, newer tap releases tend to have higher sales while older offerings suffer from lower sales. While lower sales from older beers yield less profit, it can be costly to replace them. It is important for restaurants to understand if an older beer on tap should be replaced, and if so when the optimal time for it to be replaced is. This can ensure that the number of units sold is maximized. A Markov Decision Process was used to model this situation and answer the question at hand. The MDP model provided an optimal policy that details when to replace Bold Rock IPA cider.
+
+\section{Background}
+Rich, the manager at The Fitzroy, is currently trying to determine whether he should continue selling Bold Rock IPA cider. Since this beer has been on tap for a long period of time, he is unsure whether it is more beneficial to stick with the lower sales or invest in offering a new beer on tap. Investing in a new beer has costs, such as replacing menus and actually purchasing the beer, but it could result in higher sales than the current beer on tap. As a result, the motivation for this project is to determine the best time to replace tap offerings such that sales are maximized and cost is minimized.
+
+\section{Methodology}
+
+\subsection{Data Collection}\label{AA}
+The Fitzroy utilizes Toast as its ``point of sales'' system, which automatically records and stores the amount of Bold Rock purchased. Through Toast's monthly summary of units sold, the past two years of Bold Rock IPA sales were exported and provided the basis for further analysis. 
+
+\subsection{Problem Formulation: Assumptions and MDP}
+The data was modeled as a Markov decision process by breaking the data into quartiles then determining the transition rate from each state.  The minimum value of the data was 140 units and the maximum was 301 units, with that our state space consisted of excellent sales for 260.76 - 301 units sold in a month, good sales for 220.51 - 260.57 units sold in a month, average sales for 180.26 - 220.51 units sold in a month, and and bad sales for 140 - 180.25 units sold in a month.  The transition probabilities were calculated from the ratio of the number of incidences of a specific transition from the state (i.e average to excellent) over the number of possible transitions from a state (i.e average).  Figure 1 contains the transition probability matrix of the data. The decisions modeled in this MDP were to keep the beer offering, that is, do nothing, or replace it.  The option to do nothing was applied to each of the state spaces, and the option to replace was applied to the good, average, and bad states.  
+
+\begin{figure}[t]
+\centering
+$\begin{matrix}
+    \cellspacetoplimit 3pt
+    \cellspacebottomlimit 3pt
+    \setlength{\arraycolsep}{2pt}
+\dfrac{1}{6} & \dfrac{2}{6} & \dfrac{3}{6} & 0 \\[2ex]
+\dfrac{3}{7} & \dfrac{1}{7} & \dfrac{2}{7} & \dfrac{1}{7} \\[2ex]
+0 & \dfrac{4}{6} & \dfrac{1}{6} & \dfrac{1}{6} \\[2ex] 
+\dfrac{3}{6} & \dfrac{3}{6} & 0 & 0
+\end{matrix}$
+\caption{This figure represents the P-matrix from the observed behavior in the Fitzroy Bold Rock sales}
+\end{figure}
+
+
+\vspace{20pt}
+Then to find the stationary distribution of the aperiodic, irreducible Markov chain, simulation was required, which yielded a figure (Figure 2) of when it converged on the stationary distribution of [[0.25084746 0.37175141 0.2779661  0.09943503]]:
+
+\begin{figure}[!ht]
+\includegraphics[width=8cm]{sys3060markovchainsim.png}
+\centering
+\caption{In this figure, the simulation converged on the stationary distribution by the fifth iteration.}
+\end{figure}
+
+In determining the best policy a few key assumptions were made.  It was assumed that the minimum and maximum units sold were the absolute minimum and maximum. While it is known that the absolute minimum sales could be 0, there was no way to project a known maximum value.  As well as this, given that the sale cost of a unit of Bold Rock IPA cider is \$7, we assumed a reward of \$4 per unit sold.  This assumption was based on common alcohol profit margins.  Additionally, in the case where the decision to replace was made, the expected reward was -\$188.42 and a return to the excellent state.  These assumptions were made from the cost of menu replacement as well as the fact that new beer offerings tend to have maximized sales. 
+
+\subsection{Calculations}
+Our Markov Decision Process was converted to a linear programming model.  This model produced a policy with regard to minimum cost and maximum profit, using Max Expected Discounted Reward and Max Average Reward per Period, to the using the following implementation:
+
+\vspace{3pt}
+
+1. Max Expected Discounted Reward:
+
+Objective Function: 
+
+$min (z) = \sum_{i = 1}^{n} v_i$ 
+
+Subject To: 
+
+$v_{i} - r_{id} + \beta \sum_{j=1}^{j=N} p(j|i,d) V_{j} \ge r_{id}$
+
+\vspace{3pt}
+
+2. Max Average Reward per Period:
+
+Objective Function: 
+
+$max (z) = \sum_{i = 1}^{i = N} \sum_{d \in D(i)} \pi_{id} r_{id}$
+
+Subject To: 
+
+$\sum_{i = 1}^{i \equiv N} \sum_{d \in D(i)} \pi_{id} = 1$
+
+$\sum_{d \in D(j)} \pi_{jd} = \sum_{d \in D(i)} \sum_{i = 1}^{i \equiv N} \pi_{id} p(j|i,d)$
+
+\vspace{2pt}
+
+$j = 1, 2, ... N$
+
+Non-Negativity: $\pi_{id} \ge 0$
+
+
+Another method that we used was based off of Sutton and Bario’s book, \it{Reinforcement Learning}, \normalfont{in the Policy iteration section, where they discussed the following definition of policy iteration:}
+
+1. Initialization: 
+
+
+$V(s) \in \mathbb{R}$ and $\pi \in A(s) \forall s \in S$
+
+\vspace{3pt}
+
+2. Policy Evaluation:
+Objective: $\delta \leftarrow \forall s \in S$
+
+$ V(s) \leftarrow \sum_{s^{'}=0}^{r} s^{'}, r| s, \pi(s) [r + \gamma V s^{'}]$
+
+$ \Delta \leftarrow max(\Delta , |(v - V(s))|$
+
+Until Constraint: $\Delta < \theta$ (very, small positive number)
+
+\vspace{3pt}
+
+3. Policy Improvement
+
+
+Policy-Stable means that a policy does not change with further iterations overtime, it is a function that maps each state to an action that maximizes the expected return. 
+
+$Stable \leftarrow True$
+
+$\forall s \in S$
+
+$a \leftarrow \pi(s)$
+
+$argmax_{x} f \equiv \{ x \in S: f(s) <= f(x) \forall s \in S \}$
+
+$\pi(s) \leftarrow argmax_{a}(\sum_{s^{'}=0}^{r} s^{'}, r| s, \pi(s) [r + \gamma V s^{'}])$
+
+$a \ne \pi(s), unstable \rightarrow$ repeat policy evaluation.
+
+$a = \pi(s), \Box $ V and $\pi$ are correct and usable. 
+
+\section{Discussion}
+For both the linear programming and simulation models, the policy prescription was to do nothing in the excellent or good state and to replace in the average or bad state.  In practice, this implies that when sales of Bold Rock IPA cider average above 220 units sold per month, the profits generated justify continuing its offering.  Conversely, when the monthly sales dip below an average of 220 units, the profit margin is too low to justify keeping the cider on draught.  These results align with conventional wisdom from a merchandising standpoint, as it is recommended to change merchandise offerings when sales are low to counteract consumer fatigue.
+
+Given that The Fitzroy spends roughly 65\% of its time in the bad or average sales states – that is, below 220 units sold per month – our formal recommendation is that the Bold Rock IPA cider is replaced with a new offering.
+
+
+
+
+\section{Conclusion}
+Managing draught selections is a difficult task for restaurant owners; while new offerings tend to produce the highest sales, and therefore profits, replacing old offerings can be costly when considering the cost of menu and keg replacement.  Using two years of monthly sales data of Bold Rock IPA cider from The Fitzroy, the question of whether to replace or not was answered.  Modeling the data as a Markov Decision Process produced an optimal policy with regard to maximizing profit and minimizing cost.  The policy prescribed herein is to replace the Bold Rock IPA cider with a new offering.
+
+\begin{thebibliography}{00}
+\bibitem{b1} Sutton, R.S. and Bario, A.G. (2018) Reinforcement Learning. An Introduction. 2nd Edition, A Bradford Book, Cambridge.
+\end{thebibliography}
+\vspace{12pt}
+
+
+\end{document}
